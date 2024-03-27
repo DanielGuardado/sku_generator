@@ -254,7 +254,7 @@ def create_pdf(
 
     # Adjust barcode size
     barcode_width = 40 * mm
-    barcode_height = 10 * mm
+    barcode_height = 12 * mm
 
     for index, product in enumerate(products):
         col = index % products_per_row
@@ -298,7 +298,7 @@ def create_pdf(
             text_y -= font_size * 1.2  # Adjust line height
 
         bottom_barcode_y = (
-            text_y - barcode_height - 5 * mm
+            text_y - barcode_height - 0.5 * mm
         )  # Position for the price barcode, adjust gap
 
         c.drawImage(
