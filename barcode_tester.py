@@ -268,9 +268,9 @@ def create_pdf(
         top_barcode_y = (
             y + card_height - barcode_height - 5 * mm
         )  # Adjust top margin for SKU barcode
-        bottom_barcode_y = (
-            top_barcode_y - barcode_height - 5 * mm
-        )  # Position for the price barcode, adjust gap
+        # bottom_barcode_y = (
+        #     top_barcode_y - barcode_height - 5 * mm
+        # )  # Position for the price barcode, adjust gap
 
         # Generate and draw the barcode for SKU
         sku_barcode_filename = generate_barcode(product["sku"])
@@ -284,19 +284,10 @@ def create_pdf(
 
         # Generate and draw the barcode for list price
         price_barcode_filename = generate_barcode(product["list_price"])
-        c.drawImage(
-            price_barcode_filename,
-            barcode_x,
-            bottom_barcode_y,
-            width=barcode_width,
-            height=barcode_height,
-        )
 
         # Position for the key-value pairs
         text_x = x + 10 * mm
-        text_y = (
-            bottom_barcode_y - font_size * 2
-        )  # Adjust space between barcode and text
+        text_y = top_barcode_y - font_size * 2  # Adjust space between barcode and text
 
         # Draw the key-value pairs
         for key in ["product", "condition", "title_change", "list_price"]:
@@ -305,6 +296,18 @@ def create_pdf(
             text_line = f"{key.replace('_', ' ').title()}: {truncated_value}"
             c.drawString(text_x, text_y, text_line)
             text_y -= font_size * 1.2  # Adjust line height
+
+        bottom_barcode_y = (
+            text_y - barcode_height - 5 * mm
+        )  # Position for the price barcode, adjust gap
+
+        c.drawImage(
+            price_barcode_filename,
+            barcode_x,
+            bottom_barcode_y,
+            width=barcode_width,
+            height=barcode_height,
+        )
 
         # Check if we need to start a new page
         if (index + 1) % (products_per_row * rows_per_page) == 0 and index + 1 != len(
