@@ -233,6 +233,8 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 
 def generate_barcode(sku, file_format="png"):
     code = barcode.get("code128", sku, writer=barcode.writer.ImageWriter())
+    file_name = sku
+    file_name = file_name.replace(".", "-")
     barcode_file = code.save(
         sku
     )  # This will save the barcode image in the current directory
@@ -240,7 +242,7 @@ def generate_barcode(sku, file_format="png"):
 
 
 def create_pdf(
-    products, products_per_row=3, rows_per_page=5, font_name="Helvetica", font_size=10
+    products, products_per_row=3, rows_per_page=5, font_name="Helvetica", font_size=8
 ):
     c = canvas.Canvas("product_barcodes.pdf", pagesize=letter)
     width, height = letter  # Width and height of the paper
@@ -250,6 +252,10 @@ def create_pdf(
 
     c.setFont(font_name, font_size)
 
+    # Adjust barcode size
+    barcode_width = 40 * mm
+    barcode_height = 10 * mm
+
     for index, product in enumerate(products):
         col = index % products_per_row
         row = index // products_per_row % rows_per_page
@@ -257,30 +263,48 @@ def create_pdf(
         x = col * card_width
         y = height - ((row + 1) * card_height)
 
-        barcode_filename = generate_barcode(product["sku"])
+        # Calculate positions
+        barcode_x = x + (card_width - barcode_width) / 3
+        top_barcode_y = (
+            y + card_height - barcode_height - 5 * mm
+        )  # Adjust top margin for SKU barcode
+        bottom_barcode_y = (
+            top_barcode_y - barcode_height - 5 * mm
+        )  # Position for the price barcode, adjust gap
 
-        # Draw the barcode image
-        barcode_x = (
-            x + (card_width - 70 * mm) / 2
-        )  # Center the barcode within the card width
-        barcode_y = (
-            y + card_height - 35 * mm
-        )  # Position for the barcode from the top of the card
+        # Generate and draw the barcode for SKU
+        sku_barcode_filename = generate_barcode(product["sku"])
         c.drawImage(
-            barcode_filename, barcode_x, barcode_y, width=70 * mm, height=25 * mm
+            sku_barcode_filename,
+            barcode_x,
+            top_barcode_y,
+            width=barcode_width,
+            height=barcode_height,
         )
 
-        # Start the text a bit higher than before
-        text_x = x + 5 * mm
-        text_y = barcode_y - font_size * 1  # Increased space between barcode and text
+        # Generate and draw the barcode for list price
+        price_barcode_filename = generate_barcode(product["list_price"])
+        c.drawImage(
+            price_barcode_filename,
+            barcode_x,
+            bottom_barcode_y,
+            width=barcode_width,
+            height=barcode_height,
+        )
 
+        # Position for the key-value pairs
+        text_x = x + 10 * mm
+        text_y = (
+            bottom_barcode_y - font_size * 2
+        )  # Adjust space between barcode and text
+
+        # Draw the key-value pairs
         for key in ["product", "condition", "title_change", "list_price"]:
             value = product.get(key, "")
-            # Ensure the text for each field is not too long
             truncated_value = (value[:20] + "...") if len(value) > 20 else value
             text_line = f"{key.replace('_', ' ').title()}: {truncated_value}"
             c.drawString(text_x, text_y, text_line)
-            text_y -= font_size * 1.5  # Adjust the spacing between lines if necessary
+            text_y -= font_size * 1.2  # Adjust line height
 
         # Check if we need to start a new page
         if (index + 1) % (products_per_row * rows_per_page) == 0 and index + 1 != len(
@@ -289,6 +313,9 @@ def create_pdf(
             c.showPage()
 
     c.save()
+
+
+create_pdf(products)
 
 
 # Replace 'products' with your actual products list
