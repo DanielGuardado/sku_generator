@@ -1,2 +1,5 @@
 env/
 barcodes/
+config.py
+token.pickle
+credentials.json
