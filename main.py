@@ -26,7 +26,9 @@ def main():
     gsheet_client, gdrive_client = initialize_clients()
     print("Clients initialized successfully.")
     haul_ids = input("Enter haul IDs separated by space: ")
-    haul_ids = haul_ids.split(" ")
+    # how to uppercase the input
+    # haul_ids = haul_ids.upper()
+    haul_ids = haul_ids.upper().split(" ")
     for haul_id in haul_ids:
         haul_data = gsheet_client.get_batch_names("MainInventoryRework", haul_id)
         pdf_path = create_pdf(haul_id, haul_data)

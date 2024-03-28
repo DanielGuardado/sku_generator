@@ -3,3 +3,4 @@ barcodes/
 config.py
 token.pickle
 credentials.json
+haul_ids/
