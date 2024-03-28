@@ -5,7 +5,10 @@ from config import (
     SPREADSHEET_ID,
     SHEET_SCOPES,
 )
+
 # from db_manager import get_data, insert_data, get_inserted_skus
+from barcode_generator import create_pdf
+import os
 
 
 def initialize_clients():
@@ -26,6 +29,9 @@ def main():
     haul_ids = haul_ids.split(" ")
     for haul_id in haul_ids:
         haul_data = gsheet_client.get_batch_names("MainInventoryRework", haul_id)
+        pdf_path = create_pdf(haul_id, haul_data)
+        os.startfile(pdf_path, "print")
+
         print(haul_data)
 
 
