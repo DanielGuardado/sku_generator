@@ -26,7 +26,7 @@ def generate_barcode(haul_id, sku, barcode_type, file_format="png"):
 def create_pdf(
     haul_id,
     products,
-    products_per_row=3,
+    products_per_row=4,
     rows_per_page=5,
     font_name="Helvetica",
     font_size=8,
@@ -48,6 +48,13 @@ def create_pdf(
     barcode_height = 12 * mm
 
     for index, product in enumerate(products):
+        if (
+            product["sku"] is None
+            or product["condition"] is None
+            or product["list_price"] is None
+        ):
+            continue
+
         col = index % products_per_row
         row = index // products_per_row % rows_per_page
 
@@ -89,7 +96,10 @@ def create_pdf(
         # Draw the key-value pairs
         for key in ["product", "condition", "title_change", "list_price"]:
             value = product.get(key, "")
-            truncated_value = (value[:20] + "...") if len(value) > 20 else value
+            if value is not None:
+                truncated_value = (value[:20] + "...") if len(value) > 20 else value
+            else:
+                truncated_value = ""
             text_line = f"{key.replace('_', ' ').title()}: {truncated_value}"
             c.drawString(text_x, text_y, text_line)
             text_y -= font_size * 1.2
@@ -99,6 +109,7 @@ def create_pdf(
             products
         ):
             c.showPage()
+            c.setFont(font_name, font_size)
 
     c.save()
     return pdf_path  # Return the file path of the generated PDF

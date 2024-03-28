@@ -32,7 +32,7 @@ def main():
     for haul_id in haul_ids:
         haul_data = gsheet_client.get_batch_names("MainInventoryRework", haul_id)
         pdf_path = create_pdf(haul_id, haul_data)
-        os.startfile(pdf_path, "print")
+        # os.startfile(pdf_path, "print")
 
         print(haul_data)
 
