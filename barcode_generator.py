@@ -30,6 +30,7 @@ def create_pdf(
     rows_per_page=5,
     font_name="Helvetica",
     font_size=8,
+    include_upc=False,
 ):
     base_dir = os.path.join(".", "haul_ids", haul_id)
     if not os.path.exists(base_dir):
@@ -45,7 +46,7 @@ def create_pdf(
 
     # Adjust barcode size
     barcode_width = 40 * mm
-    barcode_height = 12 * mm
+    barcode_height = 11.5 * mm
 
     for index, product in enumerate(products):
         if (
@@ -79,7 +80,10 @@ def create_pdf(
         price_barcode_filename = generate_barcode(
             haul_id, product["list_price"], "price"
         )
-        bottom_barcode_y = top_barcode_y - barcode_height - 5 * mm
+        bottom_barcode_y = top_barcode_y - barcode_height - 2 * mm
+
+        #generate and draw the barcode for the upc
+        
 
         c.drawImage(
             price_barcode_filename,
@@ -89,21 +93,51 @@ def create_pdf(
             height=barcode_height,
         )
 
+
+
+
         # Position for the key-value pairs
         text_x = x + 10 * mm
-        text_y = bottom_barcode_y - font_size * 2
+        # if include_upc_item:
+        #     text_y = bottom_bottom_barcode_y - font_size * 2
+        # else:
+        text_y = bottom_barcode_y - font_size * 1.3
 
         # Draw the key-value pairs
-        for key in ["product", "condition", "title_change", "list_price"]:
+        for key in ["product", "condition","sub_category",]:
             value = product.get(key, "")
+            # split the value if it is too long
+
             if value is not None:
                 truncated_value = (value[:20] + "...") if len(value) > 20 else value
             else:
                 truncated_value = ""
-            text_line = f"{key.replace('_', ' ').title()}: {truncated_value}"
-            c.drawString(text_x, text_y, text_line)
-            text_y -= font_size * 1.2
-
+            # text_line = f"{key.replace('_', ' ').title()}: {truncated_value}"
+            if key == "product":
+                text_line_top = value[:20]
+                text_line_bottom = value[20:]
+                c.drawString(text_x, text_y, text_line_top)
+                text_y -= font_size * 1
+                if len(text_line_bottom) > 0:
+                    c.drawString(text_x, text_y, text_line_bottom)
+                    text_y -= font_size * 1
+            else:
+                text_line = value
+                c.drawString(text_x, text_y, text_line)
+                text_y -= font_size * 1
+            # Draw UPC barcode
+        include_upc_item = include_upc and product.get("upc") != ""
+        if include_upc_item:
+            upc_barcode_filename = generate_barcode(haul_id, product["upc"], "upc")
+            bottom_bottom_barcode_y = text_y - barcode_height - 0 * mm
+            c.drawImage(
+                upc_barcode_filename,
+                barcode_x,
+                bottom_bottom_barcode_y,
+                width=barcode_width,
+                height=barcode_height,
+            )
+            text_y = bottom_bottom_barcode_y - font_size * 1  # Adjust text_y for the next iteration
         # Check if we need to start a new page
         if (index + 1) % (products_per_row * rows_per_page) == 0 and index + 1 != len(
             products

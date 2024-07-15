@@ -9,6 +9,7 @@ from config import (
 # from db_manager import get_data, insert_data, get_inserted_skus
 from barcode_generator import create_pdf
 import os
+from time import sleep
 
 
 def initialize_clients():
@@ -29,10 +30,18 @@ def main():
     # how to uppercase the input
     # haul_ids = haul_ids.upper()
     haul_ids = haul_ids.upper().split(" ")
+    add_upc = input("Do you want to include UPC? (Y/N): ")
+    if add_upc.upper() == "Y":
+        include_upc = True
+    else:
+        include_upc = False
     for haul_id in haul_ids:
-        haul_data = gsheet_client.get_batch_names("MainInventoryRework", haul_id)
-        pdf_path = create_pdf(haul_id, haul_data)
+        haul_data = gsheet_client.get_batch_names("Products", haul_id)
+        #! add a question here for if making it for drfts or for products
+        pdf_path = create_pdf(haul_id, haul_data, include_upc=include_upc)
         os.startfile(pdf_path, "print")
+        # sleep(15)
+
 
         print(haul_data)
 
