@@ -54,7 +54,15 @@ def create_pdf(
             or product["condition"] is None
             or product["list_price"] is None
         ):
-            continue
+            print(f"Missing data for product {product['product']}")
+            return False
+        if (
+            (product["sku"] == "")
+            or (product["condition"] == "")
+            or (product["list_price"] == "")
+        ):
+            print(f"Missing data for product {product['product']}")
+            return False
 
         col = index % products_per_row
         row = index // products_per_row % rows_per_page
@@ -82,8 +90,7 @@ def create_pdf(
         )
         bottom_barcode_y = top_barcode_y - barcode_height - 2 * mm
 
-        #generate and draw the barcode for the upc
-        
+        # generate and draw the barcode for the upc
 
         c.drawImage(
             price_barcode_filename,
@@ -93,9 +100,6 @@ def create_pdf(
             height=barcode_height,
         )
 
-
-
-
         # Position for the key-value pairs
         text_x = x + 10 * mm
         # if include_upc_item:
@@ -104,7 +108,11 @@ def create_pdf(
         text_y = bottom_barcode_y - font_size * 1.3
 
         # Draw the key-value pairs
-        for key in ["product", "condition","sub_category",]:
+        for key in [
+            "product",
+            "condition",
+            "sub_category",
+        ]:
             value = product.get(key, "")
             # split the value if it is too long
 
@@ -137,7 +145,9 @@ def create_pdf(
                 width=barcode_width,
                 height=barcode_height,
             )
-            text_y = bottom_bottom_barcode_y - font_size * 1  # Adjust text_y for the next iteration
+            text_y = (
+                bottom_bottom_barcode_y - font_size * 1
+            )  # Adjust text_y for the next iteration
         # Check if we need to start a new page
         if (index + 1) % (products_per_row * rows_per_page) == 0 and index + 1 != len(
             products

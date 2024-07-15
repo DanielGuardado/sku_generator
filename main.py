@@ -40,7 +40,12 @@ def main():
 
         haul_products = gsheet_client.get_all_values("Products", haul_number, "haul_id")
         pdf_path = create_pdf(haul_number, haul_products, include_upc=include_upc)
-        # os.startfile(pdf_path, "print")
+        if not pdf_path:
+            print(
+                f"Failed to generate PDF for haul {haul_number}, Please check the logs"
+            )
+            continue
+        os.startfile(pdf_path, "print")
         updated_haul_data = haul_data[0].copy()
         if not include_upc:
             updated_haul_data["skus_generated"] = 1
