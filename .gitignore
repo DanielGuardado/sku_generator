@@ -6,3 +6,4 @@ credentials.json
 haul_ids/
 __pycache__/
 service_account.json
+trash/
