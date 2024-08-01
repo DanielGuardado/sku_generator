@@ -21,8 +21,9 @@ def main():
     )
     if auto_generate.upper() == "Y":
         hauls = [
-            row["haul_number"]
+            row["haul_id"]
             for row in gsheet_client.get_all_values("Hauls", "0", "skus_generated")
+            if row["haul_id"]  # This condition checks for non-empty strings
         ]
 
     else:
@@ -35,14 +36,14 @@ def main():
     else:
         include_upc = False
 
-    for haul_number in hauls:
-        haul_data = gsheet_client.get_all_values("Hauls", haul_number, "haul_number")
+    for haul_id in hauls:
+        haul_data = gsheet_client.get_all_values("Hauls", haul_id, "haul_id")
 
-        haul_products = gsheet_client.get_all_values("Products", haul_number, "haul_id")
-        pdf_path = create_pdf(haul_number, haul_products, include_upc=include_upc)
+        haul_products = gsheet_client.get_all_values("Products", haul_id, "haul_id")
+        pdf_path = create_pdf(haul_id, haul_products, include_upc=include_upc)
         if not pdf_path:
             print(
-                f"Failed to generate PDF for haul {haul_number}, Please check the logs"
+                f"Failed to generate PDF for haul {haul_id}, Please check the logs"
             )
             continue
         os.startfile(pdf_path, "print")
@@ -52,9 +53,9 @@ def main():
 
         updated_row = gsheet_client.update_row("Hauls", updated_haul_data)
         if updated_row:
-            print(f"SKU generation status updated for haul {haul_number}")
+            print(f"SKU generation status updated for haul {haul_id}")
         else:
-            print(f"Failed to update SKU generation status for haul {haul_number}")
+            print(f"Failed to update SKU generation status for haul {haul_id}")
 
 
 if __name__ == "__main__":
