@@ -156,4 +156,4 @@ def create_pdf(
             c.setFont(font_name, font_size)
 
     c.save()
-    return pdf_path  # Return the file path of the generated PDF
+    return pdf_path
